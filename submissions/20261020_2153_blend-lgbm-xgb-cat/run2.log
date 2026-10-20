@@ -1,0 +1,18 @@
+[xgb_fe_lr0.05] fold 0: AUC 0.95925 (iter 772, 30s)
+[xgb_fe_lr0.05] fold 1: AUC 0.95809 (iter 747, 59s)
+[xgb_fe_lr0.05] fold 2: AUC 0.96013 (iter 640, 85s)
+[xgb_fe_lr0.05] fold 3: AUC 0.95924 (iter 760, 117s)
+[xgb_fe_lr0.05] fold 4: AUC 0.95946 (iter 576, 143s)
+[xgb_fe_lr0.05] OOF AUC: 0.95922 (144s) → outputs/xgb_fe_lr0.05
+[cat_fe_lr0.08] fold 0: AUC 0.95920 (iter 1654, 198s)
+[cat_fe_lr0.08] fold 1: AUC 0.95793 (iter 1330, 360s)
+[cat_fe_lr0.08] fold 2: AUC 0.96007 (iter 1227, 512s)
+[cat_fe_lr0.08] fold 3: AUC 0.95929 (iter 1394, 680s)
+[cat_fe_lr0.08] fold 4: AUC 0.95940 (iter 1169, 824s)
+[cat_fe_lr0.08] OOF AUC: 0.95917 (824s) → outputs/cat_fe_lr0.08
+[lgbm_fe_lr0.02] fold 0: AUC 0.95970 (iter 969, 35s)
+[lgbm_fe_lr0.02] fold 1: AUC 0.95837 (iter 1782, 92s)
+[lgbm_fe_lr0.02] fold 2: AUC 0.96021 (iter 1751, 147s)
+[lgbm_fe_lr0.02] fold 3: AUC 0.95941 (iter 1514, 196s)
+[lgbm_fe_lr0.02] fold 4: AUC 0.95974 (iter 1121, 960s)
+[lgbm_fe_lr0.02] OOF AUC: 0.95947 (961s) → outputs/lgbm_fe_lr0.02
