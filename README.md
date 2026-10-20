@@ -13,16 +13,39 @@ Kaggle [Playground Series - Season 6, Episode 10](https://www.kaggle.com/competi
 
 제출 전에는 [공식 일정](https://www.kaggle.com/competitions/playground-series-s6e10/overview)과 [규칙](https://www.kaggle.com/competitions/playground-series-s6e10/rules)의 최신 내용을 다시 확인하세요.
 
-`datas/`에는 Kaggle에서 받은 CSV 원본 3개가 있습니다. `docs/`는 대회 페이지의 섹션 구성과 내용을 한국어로 정리하고 원문 링크를 보존합니다.
+`docs/`는 대회 페이지의 섹션 구성과 내용을 한국어로 정리하고 원문 링크를 보존합니다.
+
+## 폴더 구조
+
+```
+├── docs/          대회 정보 정리
+├── datas/         Kaggle 원본 CSV 3개 (수정 금지, git 제외)
+├── src/           코드
+│   ├── experiment.py       모델·특성 조합별 5-fold 실험
+│   ├── blend.py            여러 실험의 순위 가중 앙상블
+│   └── save_submission.py  제출 CSV 형식 검사 후 submissions/에 보관
+├── experiments.md 모든 실험의 CV 기록표
+├── submissions/   Kaggle에 낸 제출본 (제출 1건 = 폴더 1개)
+└── outputs/       실험 산출물 (git 제외)
+```
+
+CSV 파일은 용량과 대회 데이터 재배포 제한 때문에 git에 넣지 않습니다. 새 환경에서는 [Data 탭](https://www.kaggle.com/competitions/playground-series-s6e10/data)에서 CSV 3개를 받아 `datas/`에 둡니다.
+
+## 실행 환경
+
+[uv](https://docs.astral.sh/uv/)로 관리합니다. `uv sync`로 패키지를 설치합니다.
+
+```bash
+uv run python src/experiment.py --model lgbm --features fe --lr 0.02   # 실험 → outputs/lgbm_fe_lr0.02/
+uv run python src/blend.py lgbm_fe_lr0.02 xgb_fe_lr0.05 cat_fe_lr0.08 --name blend_lgbm_xgb_cat
+```
+
+실험마다 `outputs/<이름>/`에 OOF 예측(`oof.npy`), test 예측(`pred.npy`), 제출 형식 CSV, fold별 로그가 생기고 [실험 기록](experiments.md)에 한 줄이 추가됩니다.
 
 ## 제출 기록
 
 Kaggle에 낸 제출본은 [`submissions/`](submissions/README.md) 아래에 제출마다 `YYYYMMDD_HHMM_제목/`(KST) 폴더를 만들어 CSV와 관련 문서를 함께 보관하고, [제출 기록표](submissions/README.md)에 설명·CV·Public LB 점수를 남깁니다. 새 제출본은 아래 명령으로 형식을 검사한 뒤 저장합니다.
 
 ```bash
-python3 scripts/save_submission.py 만든파일.csv 짧은-제목 --cv 0.95 --note "무엇을 바꿨는지"
+uv run python src/save_submission.py outputs/<실험>/submission.csv 짧은-제목 --cv 0.95 --note "무엇을 바꿨는지"
 ```
-
-## 실행 환경
-
-[uv](https://docs.astral.sh/uv/)로 관리합니다. `uv sync`로 패키지를 설치하고 `uv run python src/lgbm_baseline.py outputs/lgbm_baseline.csv`처럼 실행합니다. 모델 코드는 `src/`, 중간 산출물은 git에서 제외된 `outputs/`에 둡니다.

@@ -1,17 +1,22 @@
 """모델과 특성 조합을 바꿔 가며 5-fold 실험을 돌리는 공용 스크립트.
 
-실험 결과는 outputs/<이름>/ 에 저장한다.
+실험 결과는 outputs/<이름>/ 에 저장하고, experiments.md 기록표에 한 줄을 추가한다.
     oof.npy         train 각 행에 대한 OOF 예측 (앙상블 가중치 찾기에 사용)
     pred.npy        test 예측 (fold 평균)
     submission.csv  제출 형식 CSV
+    log.txt         fold별 점수 로그
 
 실행 예:
     uv run python src/experiment.py --model lgbm --features fe --lr 0.05
     uv run python src/experiment.py --model cat --features fe --lr 0.08
+    uv run python src/experiment.py --model lgbm --features base --lr 0.05   # 베이스라인
 """
 
 import argparse
+import shlex
+import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -20,6 +25,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
 ROOT = Path(__file__).resolve().parent.parent
+EXPERIMENTS = ROOT / "experiments.md"
 TARGET = "satisfaction"
 SEED = 42
 N_FOLDS = 5
@@ -120,11 +126,18 @@ def fit_predict(model: str, lr: float, X_tr, y_tr, X_va, y_va, X_te):
         clf = CatBoostClassifier(
             iterations=20000, learning_rate=lr, depth=7, eval_metric="AUC",
             od_type="Iter", od_wait=200, random_seed=SEED, thread_count=-1, verbose=False,
+            allow_writing_files=False,
         )
         clf.fit(to_str(X_tr), y_tr, cat_features=cat_cols, eval_set=(to_str(X_va), y_va), use_best_model=True)
         return clf.predict_proba(to_str(X_va))[:, 1], clf.predict_proba(to_str(X_te))[:, 1], clf.get_best_iteration()
 
     raise ValueError(model)
+
+
+def record(name: str, desc: str, auc: float, seconds: float, note: str) -> None:
+    """experiments.md 기록표에 실험 결과 한 줄을 추가한다."""
+    with EXPERIMENTS.open("a", encoding="utf-8") as f:
+        f.write(f"| {datetime.now():%Y-%m-%d %H:%M} | `{name}` | {desc} | {auc:.5f} | {seconds:.0f}s | {note} |\n")
 
 
 def main() -> None:
@@ -133,6 +146,7 @@ def main() -> None:
     parser.add_argument("--features", choices=["base", "fe"], default="fe")
     parser.add_argument("--lr", type=float, default=0.05)
     parser.add_argument("--name", help="결과 폴더 이름 (기본: 모델_특성_lr)")
+    parser.add_argument("--note", default="", help="experiments.md에 남길 메모")
     args = parser.parse_args()
     name = args.name or f"{args.model}_{args.features}_lr{args.lr}"
 
@@ -140,6 +154,11 @@ def main() -> None:
     oof = np.zeros(len(train))
     pred = np.zeros(len(test))
     start = time.time()
+    log = [f"$ uv run python src/experiment.py {shlex.join(sys.argv[1:])}"]
+
+    def say(msg: str) -> None:
+        print(msg, flush=True)
+        log.append(msg)
 
     folds = StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=SEED)
     for fold, (tr_idx, va_idx) in enumerate(folds.split(train, y)):
@@ -150,15 +169,19 @@ def main() -> None:
         )
         oof[va_idx] = va_pred
         pred += te_pred / N_FOLDS
-        print(f"[{name}] fold {fold}: AUC {roc_auc_score(y.iloc[va_idx], va_pred):.5f} "
-              f"(iter {it}, {time.time() - start:.0f}s)", flush=True)
+        say(f"[{name}] fold {fold}: AUC {roc_auc_score(y.iloc[va_idx], va_pred):.5f} "
+            f"(iter {it}, {time.time() - start:.0f}s)")
 
+    auc = roc_auc_score(y, oof)
+    seconds = time.time() - start
     out = ROOT / "outputs" / name
     out.mkdir(parents=True, exist_ok=True)
     np.save(out / "oof.npy", oof)
     np.save(out / "pred.npy", pred)
     pd.DataFrame({"id": test["id"], TARGET: pred}).to_csv(out / "submission.csv", index=False)
-    print(f"[{name}] OOF AUC: {roc_auc_score(y, oof):.5f} ({time.time() - start:.0f}s) → {out.relative_to(ROOT)}")
+    say(f"[{name}] OOF AUC: {auc:.5f} ({seconds:.0f}s) → {out.relative_to(ROOT)}")
+    (out / "log.txt").write_text("\n".join(log) + "\n", encoding="utf-8")
+    record(name, f"{args.model}, features={args.features}, lr={args.lr}", auc, seconds, args.note)
 
 
 if __name__ == "__main__":

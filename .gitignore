@@ -2,3 +2,7 @@
 __pycache__/
 .DS_Store
 outputs/
+catboost_info/
+
+# 대회 데이터와 제출 CSV는 용량과 재배포 제한 때문에 git에 넣지 않는다
+*.csv
