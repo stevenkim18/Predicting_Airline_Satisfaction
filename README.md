@@ -22,3 +22,7 @@ Kaggle에 낸 제출본은 [`submissions/`](submissions/README.md) 아래에 제
 ```bash
 python3 scripts/save_submission.py 만든파일.csv 짧은-제목 --cv 0.95 --note "무엇을 바꿨는지"
 ```
+
+## 실행 환경
+
+[uv](https://docs.astral.sh/uv/)로 관리합니다. `uv sync`로 패키지를 설치하고 `uv run python src/lgbm_baseline.py outputs/lgbm_baseline.csv`처럼 실행합니다. 모델 코드는 `src/`, 중간 산출물은 git에서 제외된 `outputs/`에 둡니다.
