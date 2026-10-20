@@ -14,3 +14,11 @@ Kaggle [Playground Series - Season 6, Episode 10](https://www.kaggle.com/competi
 제출 전에는 [공식 일정](https://www.kaggle.com/competitions/playground-series-s6e10/overview)과 [규칙](https://www.kaggle.com/competitions/playground-series-s6e10/rules)의 최신 내용을 다시 확인하세요.
 
 `datas/`에는 Kaggle에서 받은 CSV 원본 3개가 있습니다. `docs/`는 대회 페이지의 섹션 구성과 내용을 한국어로 정리하고 원문 링크를 보존합니다.
+
+## 제출 기록
+
+Kaggle에 낸 제출본은 [`submissions/`](submissions/README.md) 아래에 제출마다 `YYYYMMDD_HHMM_제목/`(KST) 폴더를 만들어 CSV와 관련 문서를 함께 보관하고, [제출 기록표](submissions/README.md)에 설명·CV·Public LB 점수를 남깁니다. 새 제출본은 아래 명령으로 형식을 검사한 뒤 저장합니다.
+
+```bash
+python3 scripts/save_submission.py 만든파일.csv 짧은-제목 --cv 0.95 --note "무엇을 바꿨는지"
+```

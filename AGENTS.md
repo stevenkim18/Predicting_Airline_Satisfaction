@@ -8,3 +8,4 @@
 - 웹페이지 문장을 길게 복제하지 말고, 원문 섹션 이름과 링크를 보존하며 내용을 정확히 요약한다. 확인되지 않은 내용은 추정으로 표시한다.
 - 데이터 수치나 열 구성을 적을 때는 가능하면 `datas/`의 실제 CSV로 검증한다. 대용량 CSV를 문서나 도구 출력에 통째로 표시하지 않는다.
 - `docs/` 구조를 바꾸면 `README.md`와 `docs/00-official-source-map.md`의 링크도 함께 갱신한다.
+- Kaggle에 제출하는 CSV는 `python3 scripts/save_submission.py <csv> <제목>`으로 `submissions/YYYYMMDD_HHMM_제목/` 폴더(KST)에 같은 이름의 CSV와 메모 README.md로 보관하고, 그 제출과 관련된 문서도 해당 폴더에 정리하며, `submissions/README.md` 기록표에 설명·CV AUC를 남긴다. Public LB 점수는 사용자가 알려주면 해당 행에 채운다. 기존 제출본 CSV는 수정하거나 지우지 않는다.
